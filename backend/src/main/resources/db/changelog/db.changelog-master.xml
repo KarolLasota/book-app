@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+       http://www.liquibase.org/xml/ns/dbchangelog
+       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="1" author="karol">
+        <createTable tableName="roles">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+        </createTable>
+
+        <createSequence sequenceName="roles_id_seq"/>
+
+        <addDefaultValue tableName="roles"
+                         columnName="id"
+                         defaultValueComputed="nextval('roles_id_seq')"/>
+    </changeSet>
+
+
+
+    <changeSet id="2" author="karol">
+        <insert tableName="roles">
+            <column name="name" value="USER"/>
+            <column name="id" value="1"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="ADMIN"/>
+            <column name="id" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3" author="karol">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="BIGINT" />
+        </createTable>
+        <createSequence sequenceName="users_id_seq" />
+
+        <addDefaultValue tableName="users"
+                         columnName="id"
+                         defaultValueComputed="nextval('users_id_seq')" />
+
+        <addForeignKeyConstraint
+                baseTableName="users" baseColumnNames="role_id"
+                referencedTableName="roles" referencedColumnNames="id"
+                onDelete="SET NULL"
+                constraintName="fk_users_role"/>
+    </changeSet>
+
+    <changeSet id="4" author="karol">
+        <createTable tableName="book">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="google_book_id" type="VARCHAR(255)"/>
+            <column name="title" type="TEXT"/>
+            <column name="authors" type="TEXT"/>
+            <column name="thumbnail" type="TEXT"/>
+            <column name="description" type="TEXT"/>
+            <column name="user_id" type="BIGINT"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="book"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_book_user"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+
+    <changeSet id="5" author="karol">
+        <createTable tableName="refreshtokens">
+            <column name="id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="expiry_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createSequence sequenceName="refresh_token_id_seq"/>
+
+        <addDefaultValue tableName="refreshtokens"
+                         columnName="id"
+                         defaultValueComputed="nextval('refresh_token_id_seq')"/>
+
+        <addForeignKeyConstraint
+                baseTableName="refreshtokens"
+                baseColumnNames="user_id"
+                referencedTableName="users"
+                referencedColumnNames="id"
+                constraintName="fk_refresh_token_user"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>
